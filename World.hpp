@@ -14,6 +14,9 @@ private:
 	typedef std::vector<GridCell*> CellVector;
 	CellVector mCells;
 
+	GridCell* mBeginNode;
+	GridCell* mEndNode;
+
 public:
 	World(sf::RenderWindow& window);
 	void init();
