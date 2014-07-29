@@ -15,8 +15,8 @@ private:
 	CellVector mCells;
 
 	GridCell* mBeginNode;
-	GridCell* mEndNode;
-
+	GridCell* mEndNode;	
+	
 public:
 	World(sf::RenderWindow& window);
 	void init();

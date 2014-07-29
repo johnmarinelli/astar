@@ -29,6 +29,9 @@ public:
 	void setWalkable(bool walkable);
 
 	void setNeighbors(std::vector<GridCell*>& cells);
+	std::vector<GridCell*>& getNeighbors();
+
+	GridCell* mParent;
 
 	~GridCell();
 };

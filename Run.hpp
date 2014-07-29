@@ -20,6 +20,8 @@ int Run(Game& game, sf::RenderWindow& window)
 		}	
 		time = clock.getElapsedTime();
 
+		game.update(time.asMilliseconds());
+
 		window.clear(sf::Color::White);
 		game.render();
 		window.display();

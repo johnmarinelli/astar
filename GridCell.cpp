@@ -1,7 +1,8 @@
 #include "GridCell.hpp"
 #include "Utilities.hpp"
+#include <cmath>
 
-GridCell::GridCell(int x, int y, int width, int height, int arrayCoordX, int arrayCoordY, sf::Color color, bool isWalkable) : mRect(sf::Vector2f(width, height)), mArrayCoords(arrayCoordX, arrayCoordY), mColor(color), mIsWalkable(isWalkable)
+GridCell::GridCell(int x, int y, int width, int height, int arrayCoordX, int arrayCoordY, sf::Color color, bool isWalkable) : mRect(sf::Vector2f(width, height)), mArrayCoords(arrayCoordX, arrayCoordY), mColor(color), mIsWalkable(isWalkable), mParent(NULL)
 {
 	mRect.setPosition(x, y);
 	mRect.setFillColor(color);
@@ -36,23 +37,31 @@ void GridCell::setWalkable(bool walkable)
 
 void GridCell::fillNeighbors(std::vector<GridCell*>& cells, int beginX, int endX, int beginY, int endY)
 {
-	int width = WINDOW_WIDTH / CELL_WIDTH; 
+	int width = std::ceil((float)WINDOW_WIDTH / (float)CELL_WIDTH), i = 0, j = 0; 
 
-	for(int i = beginY; i < endY; ++i){
-		for(int j = beginX; j < endX; ++j){
-			mNeighbors.push_back(cells.at(i+j*width));
+	for(i = beginY; i <= endY; i++){
+		for(j = beginX; j <= endX; j++){
+			mNeighbors.push_back(cells.at(j+i*width));
 		}
+		j = beginX;
 	}
 }
 
 void GridCell::setNeighbors(std::vector<GridCell*>& cells)
 {
-	int width = WINDOW_WIDTH / CELL_WIDTH;
-	int height = WINDOW_HEIGHT / CELL_HEIGHT;
+	int width = std::ceil((float)WINDOW_WIDTH / (float)CELL_WIDTH);
+	int height = std::ceil((float)WINDOW_HEIGHT / (float)CELL_HEIGHT);
 
 	int beginX = 0, beginY = 0, endX = 0, endY = 0;
 
-	if(mArrayCoords.x == 0){
+	if(mArrayCoords.x != 0 && mArrayCoords.y != 0 && mArrayCoords.x != width-1 && mArrayCoords.y != height-1){
+		//inside
+		beginX = mArrayCoords.x - 1;
+		beginY = mArrayCoords.y - 1;
+		endX = mArrayCoords.x + 1;
+		endY = mArrayCoords.y + 1;
+	}
+	else if(mArrayCoords.x == 0){
 		if(mArrayCoords.y == 0){
 			//top left
 			beginX = mArrayCoords.x;
@@ -99,7 +108,7 @@ void GridCell::setNeighbors(std::vector<GridCell*>& cells)
 		}
 	}
 	//checking endY != 0 because then it would have been set earlier already
-	if(mArrayCoords.y == 0 && mArrayCoords.x > 0 && mArrayCoords.x < width-1){
+	else if(mArrayCoords.y == 0 && mArrayCoords.x > 0 && mArrayCoords.x < width-1){
 		//top side
 		beginX = mArrayCoords.x - 1;
 		beginY = mArrayCoords.y;
@@ -113,15 +122,13 @@ void GridCell::setNeighbors(std::vector<GridCell*>& cells)
 		endX = mArrayCoords.x + 1;
 		endY = mArrayCoords.y;
 	}
-	if(mArrayCoords.x != 0 && mArrayCoords.y != 0 && mArrayCoords.x != width-1 && mArrayCoords.y != height-1){
-		//inside
-		beginX = mArrayCoords.x - 1;
-		beginY = mArrayCoords.y - 1;
-		endX = mArrayCoords.x + 1;
-		endY = mArrayCoords.y + 1;
-	}
 
 	fillNeighbors(cells, beginX, endX, beginY, endY);
+}
+
+std::vector<GridCell*>& GridCell::getNeighbors()
+{
+	return mNeighbors;
 }
 
 GridCell::~GridCell()

@@ -1,5 +1,6 @@
 #include "World.hpp"
 #include <iostream>
+#include <algorithm>
 
 #include <vector>
 #include <map>
@@ -17,6 +18,7 @@ void World::init()
 			arrayCoordX++;
 		}
 		arrayCoordY++;
+		arrayCoordX = 0;
 	}
 
 	for(auto cell : mCells){
@@ -35,7 +37,21 @@ void World::init()
 
 void World::update(float dTime)
 {
-
+	CellVector openlist, closedlist;
+	//add starting node to open list
+	openlist.push_back(mBeginNode);
+	
+	//add walkable nodes to open list
+	for(auto cell : mBeginNode->getNeighbors()){
+		if(cell->getWalkable() && cell != mBeginNode){
+			openlist.push_back(cell);
+			cell->mParent = mBeginNode;
+		}
+	}
+	
+	//remove starting node from open list, add it to closed list
+	openlist.erase(std::remove(openlist.begin(), openlist.end(), mBeginNode), openlist.end());
+	closedlist.push_back(mBeginNode);
 }
 
 void World::render()
