@@ -2,7 +2,7 @@
 #include "Utilities.hpp"
 #include <cmath>
 
-GridCell::GridCell(int x, int y, int width, int height, int arrayCoordX, int arrayCoordY, sf::Color color, bool isWalkable) : mRect(sf::Vector2f(width, height)), mArrayCoords(arrayCoordX, arrayCoordY), mColor(color), mIsWalkable(isWalkable), mParent(NULL)
+GridCell::GridCell(int x, int y, int width, int height, int arrayCoordX, int arrayCoordY, sf::Color color, bool isWalkable) : mRect(sf::Vector2f(width, height)), mArrayCoords(arrayCoordX, arrayCoordY), mColor(color), mIsWalkable(isWalkable), mGValue(0), mHValue(0), mFValue(0), mParent(NULL)
 {
 	mRect.setPosition(x, y);
 	mRect.setFillColor(color);
@@ -12,6 +12,11 @@ void GridCell::setColor(sf::Color color)
 {
 	mColor = color;
 	mRect.setFillColor(mColor);
+}
+
+const sf::Vector2f GridCell::getArrayCoords()
+{
+	return mArrayCoords;
 }
 
 const sf::RectangleShape GridCell::getRect()
@@ -60,6 +65,8 @@ void GridCell::setNeighbors(std::vector<GridCell*>& cells)
 		beginY = mArrayCoords.y - 1;
 		endX = mArrayCoords.x + 1;
 		endY = mArrayCoords.y + 1;
+	
+		mPosition = Position::MIDDLE;
 	}
 	else if(mArrayCoords.x == 0){
 		if(mArrayCoords.y == 0){
@@ -68,6 +75,8 @@ void GridCell::setNeighbors(std::vector<GridCell*>& cells)
 			beginY = mArrayCoords.y;
 			endX = mArrayCoords.x + 1;
 			endY = mArrayCoords.y + 1;
+			
+			mPosition = Position::NW_CORNER;
 		}
 		else if(mArrayCoords.y == height-1){
 			//bottom left
@@ -75,6 +84,8 @@ void GridCell::setNeighbors(std::vector<GridCell*>& cells)
 			beginY = mArrayCoords.y-1;
 			endX = beginX + 1;
 			endY = mArrayCoords.y;
+
+			mPosition = Position::SW_CORNER;
 		}
 		else{
 			//left side
@@ -82,6 +93,8 @@ void GridCell::setNeighbors(std::vector<GridCell*>& cells)
 			beginY = mArrayCoords.y - 1;
 			endX = mArrayCoords.x + 1;
 			endY = mArrayCoords.y + 1;
+	
+			mPosition = Position::LEFTSIDE;
 		}
 	}
 	else if(mArrayCoords.x == width-1){
@@ -91,6 +104,8 @@ void GridCell::setNeighbors(std::vector<GridCell*>& cells)
 			beginY = mArrayCoords.y;
 			endX = mArrayCoords.x;
 			endY = mArrayCoords.y + 1;
+
+			mPosition = Position::NE_CORNER;
 		}
 		else if(mArrayCoords.y == height-1){
 			//bottom right
@@ -98,6 +113,8 @@ void GridCell::setNeighbors(std::vector<GridCell*>& cells)
 			beginY = mArrayCoords.y - 1;
 			endX = mArrayCoords.x;
 			endY = mArrayCoords.y;
+
+			mPosition = Position::SE_CORNER;
 		}
 		else{
 			//right side
@@ -105,6 +122,8 @@ void GridCell::setNeighbors(std::vector<GridCell*>& cells)
 			beginY = mArrayCoords.y - 1;
 			endX = mArrayCoords.x;
 			endY = mArrayCoords.y + 1;
+
+			mPosition = Position::RIGHTSIDE;
 		}
 	}
 	//checking endY != 0 because then it would have been set earlier already
@@ -114,6 +133,8 @@ void GridCell::setNeighbors(std::vector<GridCell*>& cells)
 		beginY = mArrayCoords.y;
 		endX = mArrayCoords.x + 1;
 		endY = mArrayCoords.y + 1;
+		
+		mPosition = Position::TOPSIDE;
 	}
 	else if(mArrayCoords.y == height-1 && mArrayCoords.x > 0 && mArrayCoords.x < width-1){
 		//bottom side
@@ -121,6 +142,8 @@ void GridCell::setNeighbors(std::vector<GridCell*>& cells)
 		beginY = mArrayCoords.y - 1;
 		endX = mArrayCoords.x + 1;
 		endY = mArrayCoords.y;
+
+		mPosition = Position::BOTTOMSIDE;
 	}
 
 	fillNeighbors(cells, beginX, endX, beginY, endY);
@@ -129,6 +152,72 @@ void GridCell::setNeighbors(std::vector<GridCell*>& cells)
 std::vector<GridCell*>& GridCell::getNeighbors()
 {
 	return mNeighbors;
+}
+
+bool GridCell::isDiagonalNeighbor(GridCell* const neighbor)
+{
+	bool isDiagonal = false;
+
+	typedef std::numeric_limits<std::vector<GridCell*>::size_type> Invalid;
+	const std::vector<GridCell*>::const_iterator pos = std::find(mNeighbors.begin(), mNeighbors.end(), neighbor);
+
+	std::vector<GridCell*>::size_type index = Invalid::max();
+
+	if(pos != mNeighbors.end()){
+		index = pos - mNeighbors.begin();
+	}
+
+	switch(mPosition)
+	{
+		case Position::NW_CORNER: 
+			if(index == 3){
+				isDiagonal = true;	
+			}
+			break;
+		case Position::NE_CORNER:
+			if(index == 2){
+				isDiagonal = true;
+			}
+			break;
+		case Position::SW_CORNER:
+			if(index == 1){
+				isDiagonal = true;
+			}
+			break;
+		case Position::SE_CORNER:
+			if(index == 0){
+				isDiagonal = true;
+			}
+			break;
+		case Position::TOPSIDE:
+			if(index == 3 || index == 5){
+				isDiagonal = true;
+			}
+			break;
+		case Position::BOTTOMSIDE:
+			if(index == 0 || index == 2){
+				isDiagonal = true;
+			}
+			break;
+		case Position::LEFTSIDE:
+			if(index == 1 || index == 5){
+				isDiagonal = true;
+			}
+			break;
+		case Position::RIGHTSIDE:
+			if(index == 0 || index == 4){
+				isDiagonal = true;
+			}
+			break;
+		case Position::MIDDLE:
+			if(index == 0 || index == 2 || index == 6 || index == 8){
+				isDiagonal = true;	
+			}
+			break;
+		default: isDiagonal = false; break;
+	}
+
+	return isDiagonal;
 }
 
 GridCell::~GridCell()

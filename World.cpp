@@ -52,6 +52,22 @@ void World::update(float dTime)
 	//remove starting node from open list, add it to closed list
 	openlist.erase(std::remove(openlist.begin(), openlist.end(), mBeginNode), openlist.end());
 	closedlist.push_back(mBeginNode);
+
+	for(auto cell : openlist){
+		int gval = 10, hval = 0, fval = 0;
+		cell->mGValue = 10;
+
+		if(mBeginNode->isDiagonalNeighbor(cell)){
+			gval = 14;
+			cell->mGValue = gval;
+		}
+		
+		hval = getManhattanDistance(cell->getArrayCoords().x, mEndNode->getArrayCoords().x, cell->getArrayCoords().y, mEndNode->getArrayCoords().y) * 10;
+		cell->mHValue = hval;
+
+		fval = hval + gval;
+		cell->mFValue = fval;
+	} 
 }
 
 void World::render()
