@@ -68,6 +68,11 @@ void switchLists(GridCell* cell, std::vector<GridCell*>& original_list, std::vec
 	destination_list.push_back(cell);
 }
 
+/*
+* Requires parent cell, end node, open and closed lists
+* sets the cell's h, g, f values as well as its parent
+* puts the cell in the open list
+*/
 int populateOpenList(GridCell* parent, GridCell* destination, std::vector<GridCell*>& open_list, std::vector<GridCell*>& closed_list)
 {
 	for(auto cell : parent->getNeighbors()){
@@ -82,9 +87,9 @@ int populateOpenList(GridCell* parent, GridCell* destination, std::vector<GridCe
 				}
 			}
 			else{
-				open_list.push_back(cell);
 				getGValue(parent, destination, cell);
 				cell->mParent = parent;
+				open_list.push_back(cell);
 			}
 		}
 	}
@@ -123,6 +128,7 @@ void World::init()
 void World::update(float dTime)
 {
 	CellVector openlist, closedlist;
+	
 	//add starting node to open list
 	openlist.push_back(mBeginNode);
 	
@@ -132,26 +138,24 @@ void World::update(float dTime)
 	//remove starting node from open list, add it to closed list
 	switchLists(mBeginNode, openlist, closedlist);
 
-	//calculate g, h, and f values for each cell
-	for(auto cell : openlist){
-		getGValue(mBeginNode, mEndNode, cell);
+	while(!isInList(mEndNode, closedlist)){
+		//get lowest fval cell
+		GridCell* lowest_fval_cell = getLowestFValCell(openlist);
+
+		//remove lowest fval cell from openlist & put in closed list
+		switchLists(lowest_fval_cell, openlist, closedlist);
+
+		//add walkable nodes next to lowest_fval_cell to open list
+		populateOpenList(lowest_fval_cell, mEndNode, openlist, closedlist);
 	}
 
-	//get lowest fval cell
-	GridCell* lowest_fval_cell = getLowestFValCell(openlist);
-
-	//remove lowest fval cell from openlist & put in closed list
-	switchLists(lowest_fval_cell, openlist, closedlist);
-
-	//add walkable nodes next to lowest_fval_cell to open list
-	populateOpenList(lowest_fval_cell, mEndNode, openlist, closedlist);
-
-	//get lowest fval cell
-	lowest_fval_cell = getLowestFValCell(openlist);
+	printf("hello");
+/*	lowest_fval_cell = getLowestFValCell(openlist);
 
 	switchLists(lowest_fval_cell, openlist, closedlist);
 
 	populateOpenList(lowest_fval_cell, mEndNode, openlist, closedlist);
+*/
 }
 
 void World::render()
