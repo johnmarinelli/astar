@@ -16,6 +16,7 @@ public:
 
 	void init();
 
+	void handleEvents(sf::Event event);
 	void update(float dTime);
 	void render();
 

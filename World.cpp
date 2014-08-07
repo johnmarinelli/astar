@@ -1,5 +1,6 @@
 #include "World.hpp"
 #include <iostream>
+#include <cmath>
 #include <algorithm>
 
 #include <vector>
@@ -123,9 +124,11 @@ void World::init()
 	mCells.at(10)->setWalkable(false);
 	mCells.at(17)->setWalkable(false);
 	mCells.at(24)->setWalkable(false);
+
+	doAStar();
 }
 
-void World::update(float dTime)
+void World::doAStar()
 {
 	CellVector openlist, closedlist;
 	
@@ -149,13 +152,41 @@ void World::update(float dTime)
 		populateOpenList(lowest_fval_cell, mEndNode, openlist, closedlist);
 	}
 
-	printf("hello");
-/*	lowest_fval_cell = getLowestFValCell(openlist);
+	for(auto cell : closedlist){
+		cell->setColor(sf::Color::White);
+	}
+}
 
-	switchLists(lowest_fval_cell, openlist, closedlist);
+GridCell* World::getGridCellAtPosition(int x, int y)
+{
+	return mCells.at((std::floor(x / CELL_WIDTH) +  std::floor(y / CELL_HEIGHT) * std::ceil((float)WINDOW_WIDTH / CELL_WIDTH)));
+}
 
-	populateOpenList(lowest_fval_cell, mEndNode, openlist, closedlist);
-*/
+void World::handleEvents(sf::Event event)
+{
+	if(event.type == sf::Event::MouseButtonPressed){
+		if(event.mouseButton.button == sf::Mouse::Right){
+			int mouse_x = event.mouseButton.x;
+			int mouse_y = event.mouseButton.y;
+			mBeginNode = getGridCellAtPosition(mouse_x, mouse_y);
+		}
+	
+		else if(event.mouseButton.button == sf::Mouse::Left){
+			int mouse_x = event.mouseButton.x;
+			int mouse_y = event.mouseButton.y;
+			mEndNode = getGridCellAtPosition(mouse_x, mouse_y);
+		}
+		for(auto cell : mCells){
+			cell->setColor(cell->getWalkable() ? sf::Color::Black : sf::Color::Blue);
+		}
+		mBeginNode->setColor(sf::Color::Green);
+		mEndNode->setColor(sf::Color::Red);
+		doAStar();
+	}
+}
+
+void World::update(float dTime)
+{
 }
 
 void World::render()

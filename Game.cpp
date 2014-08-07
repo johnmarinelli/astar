@@ -10,6 +10,11 @@ void Game::init()
 	mWorld.init();
 }
 
+void Game::handleEvents(sf::Event event)
+{
+	mWorld.handleEvents(event);
+}
+
 void Game::update(float dTime)
 {
 	mWorld.update(dTime);

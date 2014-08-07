@@ -16,7 +16,7 @@ int Run(Game& game, sf::RenderWindow& window)
 		sf::Event event;
 		while(window.pollEvent(event))
 		{
-			//game.handlevents
+			game.handleEvents(event);
 		}	
 		time = clock.getElapsedTime();
 
