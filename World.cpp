@@ -155,6 +155,9 @@ void World::doAStar()
 	for(auto cell : closedlist){
 		cell->setColor(sf::Color::White);
 	}
+
+	mBeginNode->setColor(sf::Color::Green);
+	mEndNode->setColor(sf::Color::Red);
 }
 
 GridCell* World::getGridCellAtPosition(int x, int y)
@@ -179,8 +182,6 @@ void World::handleEvents(sf::Event event)
 		for(auto cell : mCells){
 			cell->setColor(cell->getWalkable() ? sf::Color::Black : sf::Color::Blue);
 		}
-		mBeginNode->setColor(sf::Color::Green);
-		mEndNode->setColor(sf::Color::Red);
 		doAStar();
 	}
 }
